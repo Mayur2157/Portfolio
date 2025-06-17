@@ -1,0 +1,90 @@
+[
+  {
+    "name": "Face-detection-and-blink-detection-for-liveness-verification",
+    "description": "No description available",
+    "url": "https://github.com/Mayur2157/Face-detection-and-blink-detection-for-liveness-verification",
+    "language": "Python",
+    "stars": 1,
+    "forks": 0,
+    "updated": "2025-06-17T16:25:41Z",
+    "created": "2025-02-27T08:46:49Z",
+    "topics": []
+  },
+  {
+    "name": "Library-Management-System",
+    "description": "A Django-based application to manage library operations efficiently, including book management, admin registration, and a student view for accessing library resources. The project is implemented with RESTful APIs using Django REST Framework (DRF).",
+    "url": "https://github.com/Mayur2157/Library-Management-System",
+    "language": "Python",
+    "stars": 1,
+    "forks": 0,
+    "updated": "2025-06-17T16:25:40Z",
+    "created": "2025-04-16T06:10:45Z",
+    "topics": []
+  },
+  {
+    "name": "Hand-gesture-recognition",
+    "description": "This project implements a real-time hand gesture recognition system using computer vision techniques and machine learning.",
+    "url": "https://github.com/Mayur2157/Hand-gesture-recognition",
+    "language": "Unknown",
+    "stars": 1,
+    "forks": 0,
+    "updated": "2025-01-07T08:44:51Z",
+    "created": "2024-07-06T17:10:08Z",
+    "topics": []
+  },
+  {
+    "name": "Household-Electricity-Consumption-Forecasting",
+    "description": "This project aims to predict household electricity consumption using historical data and machine learning models. It leverages various data sources, including smart meter readings and weather data, to build a forecasting model.",
+    "url": "https://github.com/Mayur2157/Household-Electricity-Consumption-Forecasting",
+    "language": "Jupyter Notebook",
+    "stars": 2,
+    "forks": 0,
+    "updated": "2024-10-24T03:09:04Z",
+    "created": "2024-07-06T09:14:03Z",
+    "topics": []
+  },
+  {
+    "name": "Google-Search-Analysis-with-Python",
+    "description": "This project is a web application built using Flask that allows users to perform Google searches and analyze the results. The analysis includes sentiment analysis and keyword frequency visualization using Plotly for interactive charts.",
+    "url": "https://github.com/Mayur2157/Google-Search-Analysis-with-Python",
+    "language": "Python",
+    "stars": 1,
+    "forks": 0,
+    "updated": "2024-10-23T16:16:41Z",
+    "created": "2024-07-25T18:11:57Z",
+    "topics": []
+  },
+  {
+    "name": "Predictive-Maintenance-for-Industrial-Equipment-Using-Machine-Learning",
+    "description": "This project aims to predict equipment failures before they occur, helping to avoid downtime and improve maintenance scheduling.",
+    "url": "https://github.com/Mayur2157/Predictive-Maintenance-for-Industrial-Equipment-Using-Machine-Learning",
+    "language": "Jupyter Notebook",
+    "stars": 1,
+    "forks": 0,
+    "updated": "2024-10-22T16:50:29Z",
+    "created": "2024-08-29T06:26:53Z",
+    "topics": []
+  },
+  {
+    "name": "Sports-Retail-Analytics-Forecasting",
+    "description": " The Online Sports Retail Analytics and Forecasting project aims to analyze sales data, forecast trends, and segment customers to  improve revenue optimization strategies for an online sports retail store. This project uses various data analytics techniques and  visualizations to provide actionable insights.",
+    "url": "https://github.com/Mayur2157/Sports-Retail-Analytics-Forecasting",
+    "language": "Python",
+    "stars": 1,
+    "forks": 0,
+    "updated": "2024-10-22T16:50:27Z",
+    "created": "2024-08-03T15:04:02Z",
+    "topics": []
+  },
+  {
+    "name": "-ChurnChampion-Churn-Prediction-Modeling-Project",
+    "description": "ChurnChampion is a predictive modeling project aimed at forecasting customer churn rates. By leveraging machine learning techniques, the project identifies customers who are likely to discontinue using a service, enabling businesses to implement retention strategies proactively.",
+    "url": "https://github.com/Mayur2157/-ChurnChampion-Churn-Prediction-Modeling-Project",
+    "language": "Jupyter Notebook",
+    "stars": 1,
+    "forks": 0,
+    "updated": "2024-10-22T16:50:24Z",
+    "created": "2024-10-02T16:47:23Z",
+    "topics": []
+  }
+]
