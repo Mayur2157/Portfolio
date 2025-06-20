@@ -239,4 +239,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 **Created by Mayur Gadekar**  
 AI/ML Engineer | Python Developer | Data Scientist  
 📧 mayurgadekar2501@gmail.com  
-🔗 [LinkedIn](https://linkedin.com/in/mayur-gadekar](https://www.linkedin.com/in/mayur-gadekar-a30619319?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3B2FsfVf%2F5SIqVtQHViy%2F4gA%3D%3D) | [GitHub](https://github.com/Mayur2157)
