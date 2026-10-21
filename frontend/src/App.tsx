@@ -7,6 +7,7 @@ import { Hero } from "./components/sections/Hero";
 import { Impact } from "./components/sections/Impact";
 import { Projects } from "./components/sections/Projects";
 import { Skills } from "./components/sections/Skills";
+import { SciFiBackground } from "./components/ui/SciFiBackground";
 import { useGithubRepos } from "./hooks/useGithubRepos";
 
 export function App() {
@@ -20,6 +21,7 @@ export function App() {
       >
         Skip to content
       </a>
+      <SciFiBackground />
       <Header />
       <main id="main" tabIndex={-1} className="outline-none">
         <Hero repos={repos} />

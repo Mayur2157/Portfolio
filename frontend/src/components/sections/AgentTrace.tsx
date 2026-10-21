@@ -1,4 +1,4 @@
-import { Check, LoaderCircle, RotateCcw } from "lucide-react";
+import { Check, Cpu, LoaderCircle, RotateCcw, Terminal } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { profile } from "../../content/profile";
@@ -44,40 +44,57 @@ export function AgentTrace({ repos }: { repos: ReposState }) {
   }, [reduceMotion, revealed, steps.length]);
 
   return (
-    <figure className="card relative overflow-hidden font-mono text-meta">
-      <figcaption className="flex items-center justify-between border-b border-line px-4 py-2.5 text-muted">
+    <figure className="hud-card relative overflow-hidden font-mono text-meta">
+      {/* Sci-Fi Corner Crosshairs */}
+      <span aria-hidden="true" className="hud-corner hud-corner-tl" />
+      <span aria-hidden="true" className="hud-corner hud-corner-tr" />
+      <span aria-hidden="true" className="hud-corner hud-corner-bl" />
+      <span aria-hidden="true" className="hud-corner hud-corner-br" />
+
+      {/* Terminal Telemetry Header */}
+      <figcaption className="flex items-center justify-between border-b border-line bg-surface-2/60 px-4 py-2.5 text-muted">
         <span className="flex items-center gap-2">
           <span aria-hidden="true" className="flex gap-1.5">
-            <span className="size-2.5 rounded-full bg-line" />
-            <span className="size-2.5 rounded-full bg-line" />
-            <span className="size-2.5 rounded-full bg-line" />
+            <span className="size-2 rounded-full bg-line" />
+            <span className="size-2 rounded-full bg-line" />
+            <span className="size-2 rounded-full bg-line" />
           </span>
-          agent.run(&quot;portfolio&quot;)
+          <Terminal className="size-3.5 text-primary" aria-hidden="true" />
+          <span className="font-semibold text-ink">agent.run(&quot;portfolio&quot;)</span>
         </span>
-        {!reduceMotion && (
-          <button
-            type="button"
-            onClick={() => setRevealed(0)}
-            disabled={!done}
-            className="-my-1 inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 hover:text-ink disabled:invisible"
-            aria-label="Replay agent trace"
-          >
-            <RotateCcw className="size-3.5" aria-hidden="true" />
-            replay
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          <span className="hidden items-center gap-1 text-[0.68rem] text-primary sm:flex">
+            <Cpu className="size-3" aria-hidden="true" />
+            INFERENCE_ACTIVE
+          </span>
+          {!reduceMotion && (
+            <button
+              type="button"
+              onClick={() => setRevealed(0)}
+              disabled={!done}
+              className="-my-1 inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 text-[0.75rem] hover:text-ink disabled:invisible"
+              aria-label="Replay agent trace"
+            >
+              <RotateCcw className="size-3.5" aria-hidden="true" />
+              replay
+            </button>
+          )}
+        </div>
       </figcaption>
 
       {/* The animation is decorative; screen readers get the summary below instead. */}
-      <ol aria-hidden="true" className="space-y-2.5 px-4 py-4">
+      <ol aria-hidden="true" className="space-y-3 px-5 py-5">
         {steps.slice(0, shown).map((step, index) => {
           const isLast = index === shown - 1;
           const running = step.waiting || (isLast && !done);
           if (step.id === "answer") {
             return (
-              <li key={step.id} className="mt-3 border-t border-line pt-3">
-                <p className="text-accent">answer</p>
-                <p className="mt-1 font-sans text-small text-ink">{profile.traceAnswer}</p>
+              <li key={step.id} className="mt-3 border-t border-line/80 pt-3">
+                <div className="flex items-center gap-2 text-accent">
+                  <span className="radar-dot !bg-accent" />
+                  <span className="font-bold uppercase tracking-wider text-[0.75rem]">Answer</span>
+                </div>
+                <p className="mt-1.5 font-sans text-small leading-relaxed text-ink">{profile.traceAnswer}</p>
               </li>
             );
           }
@@ -86,9 +103,13 @@ export function AgentTrace({ repos }: { repos: ReposState }) {
               {running ? (
                 <LoaderCircle className="mt-0.5 size-4 shrink-0 animate-spin text-accent motion-reduce:animate-none" />
               ) : (
-                <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                <span className="mt-0.5 grid size-4 place-items-center rounded bg-primary/10 text-primary">
+                  <Check className="size-3" />
+                </span>
               )}
-              <span className="w-16 shrink-0 text-muted">{step.op}</span>
+              <span className="w-16 shrink-0 font-semibold uppercase tracking-wider text-muted text-[0.75rem]">
+                {step.op}
+              </span>
               <span className="min-w-0 break-words text-ink">{step.detail}</span>
             </li>
           );
@@ -100,7 +121,11 @@ export function AgentTrace({ repos }: { repos: ReposState }) {
           </li>
         )}
       </ol>
-      <p className="sr-only">{profile.traceAnswer}</p>
+
+      <div className="sr-only">
+        <p>Agent trace completed.</p>
+        <p>{profile.traceAnswer}</p>
+      </div>
     </figure>
   );
 }

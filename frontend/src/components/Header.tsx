@@ -5,10 +5,10 @@ import { profile } from "../content/profile";
 import { ThemeToggle } from "./ui/ThemeToggle";
 
 const NAV_LINKS = [
-  { href: "#experience", label: "Experience" },
-  { href: "#projects", label: "Projects" },
-  { href: "#skills", label: "Skills" },
-  { href: "#contact", label: "Contact" },
+  { href: "#experience", label: "Experience", num: "01" },
+  { href: "#projects", label: "Projects", num: "02" },
+  { href: "#skills", label: "Skills", num: "03" },
+  { href: "#contact", label: "Contact", num: "04" },
 ];
 
 export function Header() {
@@ -34,20 +34,27 @@ export function Header() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md transition-colors">
       <nav aria-label="Main" className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:px-6">
-        <a href="#home" className="mr-auto flex items-center gap-2 rounded-md py-2 font-semibold tracking-tight">
-          <span aria-hidden="true" className="grid size-8 place-items-center rounded-md bg-primary font-mono text-meta text-on-primary">
+        <a href="#home" className="mr-auto flex items-center gap-2.5 rounded-lg py-1.5 font-bold tracking-tight text-ink">
+          <span aria-hidden="true" className="grid size-8 place-items-center rounded-lg bg-primary font-mono text-meta font-bold text-on-primary shadow-[0_0_12px_var(--glow-cyan)]">
             MG
           </span>
-          {profile.name}
+          <span className="flex items-center gap-2">
+            <span>{profile.name}</span>
+            <span className="hidden items-center gap-1.5 rounded-full border border-line bg-surface px-2 py-0.5 font-mono text-[0.65rem] text-primary sm:inline-flex">
+              <span className="radar-dot !size-1.5" aria-hidden="true" />
+              ONLINE
+            </span>
+          </span>
         </a>
 
         <ul className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
-              <a href={link.href} className="btn btn-ghost px-3 font-medium">
-                {link.label}
+              <a href={link.href} className="btn btn-ghost px-3 text-small">
+                <span className="font-mono text-[0.7rem] text-primary opacity-80">{link.num} //</span>
+                <span>{link.label}</span>
               </a>
             </li>
           ))}
@@ -56,7 +63,7 @@ export function Header() {
         <ThemeToggle />
 
         {__HAS_RESUME__ && (
-          <a href="/resume.pdf" download="Mayur Gadekar Resume.pdf" className="btn btn-primary hidden sm:inline-flex">
+          <a href="/resume.pdf" download="Mayur Gadekar Resume.pdf" className="btn btn-primary hidden sm:inline-flex text-small">
             <Download className="size-4" aria-hidden="true" />
             Resume
           </a>
@@ -75,21 +82,22 @@ export function Header() {
         </button>
       </nav>
 
-      <div id="mobile-menu" hidden={!open} className="border-t border-line md:hidden">
-        <ul className="mx-auto max-w-6xl px-4 py-2">
+      <div id="mobile-menu" hidden={!open} className="border-t border-line bg-surface/95 backdrop-blur-md md:hidden">
+        <ul className="mx-auto max-w-6xl px-4 py-3 space-y-1">
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
-              <a href={link.href} className="flex min-h-11 items-center rounded-md px-2 font-medium" onClick={() => setOpen(false)}>
-                {link.label}
+              <a href={link.href} className="flex min-h-11 items-center gap-2 rounded-lg px-3 font-medium text-ink hover:bg-surface-2" onClick={() => setOpen(false)}>
+                <span className="font-mono text-meta text-primary">{link.num} //</span>
+                <span>{link.label}</span>
               </a>
             </li>
           ))}
           {__HAS_RESUME__ && (
-            <li>
+            <li className="pt-2 border-t border-line/60">
               <a
                 href="/resume.pdf"
                 download="Mayur Gadekar Resume.pdf"
-                className="flex min-h-11 items-center gap-2 rounded-md px-2 font-medium text-primary"
+                className="flex min-h-11 items-center gap-2 rounded-lg px-3 font-semibold text-primary hover:bg-surface-2"
               >
                 <Download className="size-4" aria-hidden="true" />
                 Download resume

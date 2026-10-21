@@ -1,3 +1,4 @@
+import { Cpu } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { categories, projects } from "../../content/projects";
@@ -30,11 +31,20 @@ export function Projects({ repos }: { repos: ReposState }) {
   return (
     <Section
       id="projects"
-      eyebrow="Projects"
-      title="Things I've built"
-      intro="Production GenAI systems from my current work, research, and earlier open-source projects."
+      eyebrow="Neural Modules & Vault"
+      title="Production Systems & Research"
+      intro="Deployed GenAI architectures, multimodal vision-language models, voice pipelines, and open-source intelligence tools."
     >
-      <div role="group" aria-label="Filter projects by area" className="flex flex-wrap gap-2">
+      {/* Sci-Fi Filter Bar */}
+      <div
+        role="group"
+        aria-label="Filter projects by area"
+        className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-surface/60 p-2 backdrop-blur-md"
+      >
+        <span className="hidden px-2 font-mono text-[0.7rem] uppercase tracking-wider text-muted lg:inline-flex items-center gap-1.5">
+          <Cpu className="size-3.5 text-primary" aria-hidden="true" />
+          FILTER //
+        </span>
         {categories.map((category) => {
           const active = filter === category.id;
           return (
@@ -43,12 +53,20 @@ export function Projects({ repos }: { repos: ReposState }) {
               type="button"
               aria-pressed={active}
               onClick={() => setFilter(category.id)}
-              className={`btn min-h-10 rounded-full px-4 ${
-                active ? "btn-primary" : "border-line bg-surface text-muted hover:border-primary hover:text-ink"
+              className={`btn min-h-9 rounded-lg px-3 py-1.5 text-small transition-all ${
+                active
+                  ? "btn-primary font-semibold shadow-[0_0_15px_var(--glow-cyan)]"
+                  : "border-line bg-surface text-muted hover:border-primary hover:text-ink"
               }`}
             >
               {category.label}
-              <span className={`font-mono text-meta ${active ? "" : "text-muted"}`}>{countFor(category.id)}</span>
+              <span
+                className={`ml-1.5 font-mono text-meta rounded px-1.5 py-0.5 ${
+                  active ? "bg-on-primary/20 text-on-primary" : "bg-surface-2 text-muted"
+                }`}
+              >
+                {countFor(category.id)}
+              </span>
             </button>
           );
         })}
@@ -59,9 +77,9 @@ export function Projects({ repos }: { repos: ReposState }) {
       </p>
 
       {visible.length === 0 ? (
-        <p className="mt-8 text-muted">No projects in this area yet. Try another filter.</p>
+        <p className="mt-8 font-mono text-muted">No projects in this area yet. Try another filter.</p>
       ) : (
-        <ul className="mt-8 grid gap-5 md:grid-cols-2">
+        <ul className="mt-8 grid gap-6 md:grid-cols-2">
           {visible.map((project) => (
             <li key={project.id}>
               <ProjectCard project={project} stats={findRepo(repos, project.repoUrl)} onOpen={open} />
