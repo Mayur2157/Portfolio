@@ -1,12 +1,13 @@
 // Theme Management
+// The initial theme is applied before first paint by templates/_theme_init.html.
 class ThemeManager {
     constructor() {
-        this.theme = localStorage.getItem('theme') || 'dark';
+        this.theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
         this.init();
     }
 
     init() {
-        this.setTheme(this.theme);
+        this.updateToggle();
         this.bindEvents();
     }
 
@@ -17,19 +18,42 @@ class ThemeManager {
                 this.toggleTheme();
             });
         }
+
+        // Follow the system theme until the visitor picks one explicitly
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+                if (!this.getSavedTheme()) {
+                    this.setTheme(e.matches ? 'light' : 'dark');
+                }
+            });
+        }
     }
 
-    setTheme(theme) {
+    getSavedTheme() {
+        try {
+            return localStorage.getItem('theme');
+        } catch (e) {
+            return null;
+        }
+    }
+
+    setTheme(theme, persist = false) {
         this.theme = theme;
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-        this.updateToggleIcon();
+        if (persist) {
+            try {
+                localStorage.setItem('theme', theme);
+            } catch (e) {
+                // Storage blocked (private mode); the choice lasts for this page view only
+            }
+        }
+        this.updateToggle();
     }
 
     toggleTheme() {
         const newTheme = this.theme === 'dark' ? 'light' : 'dark';
-        this.setTheme(newTheme);
-        
+        this.setTheme(newTheme, true);
+
         // Add smooth transition effect
         document.body.style.transition = 'all 0.3s ease';
         setTimeout(() => {
@@ -37,11 +61,14 @@ class ThemeManager {
         }, 300);
     }
 
-    updateToggleIcon() {
-        const toggleIcon = document.querySelector('#theme-toggle i');
+    updateToggle() {
+        const toggle = document.getElementById('theme-toggle');
+        if (!toggle) return;
+        const toggleIcon = toggle.querySelector('i');
         if (toggleIcon) {
             toggleIcon.className = this.theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         }
+        toggle.setAttribute('aria-label', this.theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
     }
 }
 
@@ -49,14 +76,3 @@ class ThemeManager {
 document.addEventListener('DOMContentLoaded', () => {
     new ThemeManager();
 });
-
-// Handle system theme preference changes
-if (window.matchMedia) {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    mediaQuery.addListener((e) => {
-        if (!localStorage.getItem('theme')) {
-            const theme = e.matches ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', theme);
-        }
-    });
-}

@@ -15,7 +15,8 @@
     --text-primary: #ffffff;
     --text-secondary: #a1a1aa;
     --text-muted: #71717a;
-    
+    --error-text: #fca5a5;
+
     --border-color: rgba(255, 255, 255, 0.1);
     --shadow-color: rgba(0, 0, 0, 0.3);
     
@@ -38,7 +39,8 @@
     --text-primary: #1e293b;
     --text-secondary: #475569;
     --text-muted: #64748b;
-    
+    --error-text: #b91c1c;
+
     --border-color: rgba(0, 0, 0, 0.1);
     --shadow-color: rgba(0, 0, 0, 0.1);
     --glass-border: 1px solid rgba(0, 0, 0, 0.1);
@@ -62,6 +64,28 @@ body {
 
 html {
     scroll-behavior: smooth;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.invalid-feedback {
+    color: var(--error-text);
+}
+
+.privacy-notice {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.privacy-notice a {
+    color: var(--accent-color);
+}
+
+.error-card {
+    max-width: 480px;
 }
 
 /* Loading Screen */
@@ -677,6 +701,9 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    border: 0;
+    font: inherit;
     background: var(--primary-color);
     color: white;
     padding: 0.75rem 1rem;
@@ -694,6 +721,21 @@ html {
 
 .project-category {
     display: none;
+}
+
+.projects-status {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem 0;
+}
+
+.chart-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-secondary);
+    text-align: center;
 }
 
 /* Contact Section */

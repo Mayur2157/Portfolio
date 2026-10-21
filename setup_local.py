@@ -49,23 +49,12 @@ def install_dependencies():
     
     pip_cmd = get_pip_command()
     
-    dependencies = [
-        "flask==3.0.0",
-        "flask-mail==0.9.1", 
-        "gunicorn==21.2.0",
-        "requests==2.31.0",
-        "beautifulsoup4==4.12.2",
-        "trafilatura==1.6.4"
-    ]
-    
     try:
         # Upgrade pip first
         subprocess.run([pip_cmd, "install", "--upgrade", "pip"], check=True, capture_output=True)
         
-        # Install dependencies
-        for dep in dependencies:
-            print(f"   Installing {dep.split('==')[0]}...")
-            subprocess.run([pip_cmd, "install", dep], check=True, capture_output=True)
+        # Install the pinned dependencies (requirements.txt is the single source of truth)
+        subprocess.run([pip_cmd, "install", "-r", "requirements.txt"], check=True, capture_output=True)
         
         print("✅ All dependencies installed successfully")
         return True
@@ -88,8 +77,19 @@ MAIL_PASSWORD=your-app-password
 MAIL_DEFAULT_SENDER=your-email@gmail.com
 CONTACT_EMAIL=mayurgadekar2501@gmail.com
 
+# Development only: enables auto-reload and the interactive debugger. Never set in production.
+FLASK_DEBUG=1
+
+# Optional: DEBUG, INFO (default), WARNING, ERROR
+LOG_LEVEL=INFO
+
+# Set to 1 when deployed behind a reverse proxy (Heroku, Render, Nginx); leave 0 locally.
+PROXY_COUNT=0
+
 # Note: Email configuration is optional. 
 # The website will work without it, but contact form won't send emails.
+# This file is NOT loaded automatically - export these variables in your shell
+# (or your host's settings) before starting the app.
 """
     
     if not os.path.exists(".env"):
@@ -123,8 +123,8 @@ def show_run_instructions():
         print("   source venv/bin/activate")
     
     print("\n2. Run the application:")
-    print(f"   {python_cmd} app.py")
-    print("   OR")
+    print(f"   {python_cmd} main.py")
+    print("   OR (Mac/Linux only - gunicorn does not run on Windows)")
     print("   gunicorn --bind 0.0.0.0:5000 --reload main:app")
     
     print("\n3. Open your browser and visit:")

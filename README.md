@@ -62,29 +62,33 @@ source venv/bin/activate
 With the virtual environment activated, install the required packages:
 
 ```bash
-pip install flask flask-mail gunicorn requests beautifulsoup4 trafilatura
+pip install -r requirements.txt
 ```
 
 ### Step 4: Environment Variables (Optional)
 
-Create a `.env` file in the project root for email functionality:
+The app reads its configuration from environment variables. Set them in your shell
+(or in your hosting provider's settings). A `.env` file is **not** loaded automatically.
+
+| Variable | Purpose |
+|---|---|
+| `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_DEFAULT_SENDER` | SMTP account used to send contact form messages |
+| `CONTACT_EMAIL` | Inbox that receives contact form messages |
+| `FLASK_DEBUG=1` | Development only: auto-reload and the interactive debugger. Never set in production |
+| `LOG_LEVEL` | `DEBUG`, `INFO` (default), `WARNING` or `ERROR` |
+| `PROXY_COUNT=1` | Set when deployed behind a reverse proxy (Heroku, Render, Nginx) so the contact form rate limit sees real visitor IPs. Leave unset locally |
+| `SESSION_SECRET` | Optional; nothing is stored in the session today, so a random key is generated when unset |
 
 ```bash
-# Create .env file
-touch .env  # Mac/Linux
-# or create manually on Windows
-```
+# Mac/Linux
+export MAIL_USERNAME=your-email@gmail.com
+export MAIL_PASSWORD=your-app-password
+export FLASK_DEBUG=1
 
-Add the following content to `.env`:
-
-```env
-SESSION_SECRET=your-secret-key-here
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
-MAIL_DEFAULT_SENDER=your-email@gmail.com
-CONTACT_EMAIL=mayurgadekar2501@gmail.com
+# Windows (PowerShell)
+$env:MAIL_USERNAME = "your-email@gmail.com"
+$env:MAIL_PASSWORD = "your-app-password"
+$env:FLASK_DEBUG = "1"
 ```
 
 **Note**: Email configuration is optional. The website will work without it, but the contact form won't send emails.
@@ -94,10 +98,10 @@ CONTACT_EMAIL=mayurgadekar2501@gmail.com
 Start the development server:
 
 ```bash
-# Method 1: Using Flask directly
-python app.py
+# Method 1: Flask development server (any OS)
+python main.py
 
-# Method 2: Using Gunicorn (recommended)
+# Method 2: Gunicorn, as used in production (Mac/Linux only)
 gunicorn --bind 0.0.0.0:5000 --reload main:app
 ```
 
@@ -112,13 +116,17 @@ http://localhost:5000
 
 ```
 MayurPortfolio/
-├── app.py                 # Flask application setup
-├── main.py               # Application entry point
-├── routes.py             # Route definitions and API endpoints
-├── github_scraper.py     # GitHub repository fetching script
+├── app.py                 # Flask application setup and configuration
+├── main.py               # Development entry point (python main.py)
+├── routes.py             # Route definitions, API endpoints, projects data
+├── github_scraper.py     # Refreshes github_repos.json
+├── github_repos.json     # Live stars/language merged into the projects list
+├── test_app.py           # Self-check: python test_app.py
 ├── templates/
 │   ├── base.html         # Base template
-│   └── index.html        # Main portfolio page
+│   ├── index.html        # Main portfolio page
+│   ├── error.html        # 404 / 500 page
+│   └── _theme_init.html  # Applies the theme before first paint
 ├── static/
 │   ├── css/
 │   │   └── style.css     # Main stylesheet
@@ -136,15 +144,25 @@ MayurPortfolio/
 ## 🔧 Customization
 
 ### Updating Projects
-To update projects with latest GitHub data:
+Project titles, descriptions and highlights live in the `PROJECTS` list in `routes.py`.
+Star counts and languages are refreshed from GitHub:
 
 ```bash
-python github_scraper.py
+python github_scraper.py   # updates github_repos.json
+```
+
+Restart the app afterwards to pick up the new data. If GitHub can't be reached, the
+existing `github_repos.json` is left untouched.
+
+### Checking Your Changes
+```bash
+python test_app.py
 ```
 
 ### Modifying Content
 - **Personal Information**: Edit `templates/index.html`
 - **Skills Data**: Modify the `get_skills()` function in `routes.py`
+- **Projects**: Modify the `PROJECTS` list in `routes.py`
 - **Styling**: Update `static/css/style.css`
 - **Functionality**: Modify JavaScript files in `static/js/`
 
@@ -163,15 +181,16 @@ python github_scraper.py
 To make the website accessible on your local network:
 
 ```bash
-python app.py
-# or
+python main.py
+# or (Mac/Linux)
 gunicorn --bind 0.0.0.0:5000 main:app
 ```
 
 Find your local IP address and access via: `http://YOUR-IP:5000`
 
 ### Option 2: Cloud Deployment
-The project is ready for deployment on platforms like:
+Set the mail variables and `PROXY_COUNT=1` in your host's settings. The `Procfile`
+runs `gunicorn app:app`. The project is ready for deployment on platforms like:
 - Heroku
 - Vercel
 - Railway

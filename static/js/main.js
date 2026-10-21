@@ -51,6 +51,8 @@ function removeLoadingScreen() {
 
 // Typing Animation
 function initTypingAnimation() {
+    if (!document.getElementById('typed-text')) return;
+
     const options = {
         strings: [
             'AI/ML Engineer',
@@ -135,34 +137,51 @@ function initNavbarScroll() {
 }
 
 // Contact Form
+function setFieldErrors(form, errors) {
+    form.querySelectorAll('.form-control').forEach(field => {
+        const message = errors[field.name];
+        const feedback = document.getElementById(`${field.name}-error`);
+        field.classList.toggle('is-invalid', Boolean(message));
+        field.setAttribute('aria-invalid', message ? 'true' : 'false');
+        if (feedback) feedback.textContent = message || '';
+    });
+}
+
 function initContactForm() {
     const contactForm = document.getElementById('contact-form');
-    
+    if (!contactForm) return;
+
     contactForm.addEventListener('submit', async function(e) {
         e.preventDefault();
-        
+
         const submitBtn = contactForm.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        
+
         // Show loading state
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>Sending...';
         submitBtn.disabled = true;
-        
+        setFieldErrors(contactForm, {});
+
         try {
             const formData = new FormData(contactForm);
-            
+
             const response = await fetch('/contact', {
                 method: 'POST',
                 body: formData
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 showNotification(result.message, 'success');
                 contactForm.reset();
             } else {
                 showNotification(result.message, 'error');
+                if (result.errors) {
+                    setFieldErrors(contactForm, result.errors);
+                    const firstInvalid = contactForm.querySelector('.is-invalid');
+                    if (firstInvalid) firstInvalid.focus();
+                }
             }
         } catch (error) {
             console.error('Contact form error:', error);
@@ -198,13 +217,15 @@ function showNotification(message, type = 'info') {
         max-width: 400px;
     `;
     
+    notification.setAttribute('role', type === 'success' ? 'status' : 'alert');
     notification.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: space-between;">
-            <span><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}</span>
-            <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: 1rem;">&times;</button>
+            <span><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2" aria-hidden="true"></i><span class="notification-text"></span></span>
+            <button type="button" aria-label="Dismiss notification" onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: 1rem;">&times;</button>
         </div>
     `;
-    
+    notification.querySelector('.notification-text').textContent = message;
+
     document.body.appendChild(notification);
     
     // Animate in
@@ -219,24 +240,55 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
+// Escape values before interpolating them into HTML (project data partly comes from GitHub)
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Loaded once by loadProjects and reused by the details modal
+let projectsData = [];
+
+function showProjectsStatus(container, message) {
+    container.innerHTML = '';
+    const status = document.createElement('div');
+    status.className = 'col-12 projects-status';
+    status.setAttribute('role', 'status');
+    status.textContent = message;
+    container.appendChild(status);
+}
+
 // Load Projects
 async function loadProjects() {
+    const projectsContainer = document.getElementById('projects-container');
+    if (!projectsContainer) return;
+
     try {
         const response = await fetch('/api/projects');
-        const projects = await response.json();
-        
-        const projectsContainer = document.getElementById('projects-container');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        projectsData = await response.json();
+
+        if (projectsData.length === 0) {
+            showProjectsStatus(projectsContainer, 'No projects to show yet. Check back soon.');
+            return;
+        }
+
         projectsContainer.innerHTML = '';
-        
-        projects.forEach((project, index) => {
+
+        projectsData.forEach((project, index) => {
             const projectCard = createProjectCard(project, index);
             projectsContainer.appendChild(projectCard);
         });
-        
+
         // Refresh AOS
         AOS.refresh();
     } catch (error) {
         console.error('Error loading projects:', error);
+        showProjectsStatus(projectsContainer, 'Projects couldn\'t be loaded. Please refresh the page, or see them on GitHub.');
     }
 }
 
@@ -246,41 +298,42 @@ function createProjectCard(project, index) {
     col.className = 'col-lg-6 mb-4';
     col.setAttribute('data-aos', index % 2 === 0 ? 'fade-right' : 'fade-left');
     col.setAttribute('data-category', project.category);
-    
+
     col.innerHTML = `
         <div class="glass-card project-card">
             <div class="project-header">
                 <div>
-                    <h4 class="project-title">${project.title}</h4>
-                    <div class="project-period">${project.period}</div>
+                    <h4 class="project-title">${escapeHtml(project.title)}</h4>
+                    <div class="project-period">${escapeHtml(project.period)}</div>
                 </div>
                 <div class="project-actions">
                     ${project.github_url ? `
-                        <a href="${project.github_url}" target="_blank" class="github-link" title="View on GitHub" onclick="event.stopPropagation()">
-                            <i class="fab fa-github"></i>
+                        <a href="${escapeHtml(project.github_url)}" target="_blank" rel="noopener noreferrer" class="github-link" title="View on GitHub" aria-label="View ${escapeHtml(project.title)} on GitHub">
+                            <i class="fab fa-github" aria-hidden="true"></i>
                         </a>
                     ` : ''}
                     ${project.stars ? `
-                        <span class="project-stars" title="${project.stars} stars">
-                            <i class="fas fa-star"></i> ${project.stars}
+                        <span class="project-stars" title="${escapeHtml(project.stars)} stars">
+                            <i class="fas fa-star" aria-hidden="true"></i> ${escapeHtml(project.stars)}<span class="visually-hidden"> stars</span>
                         </span>
                     ` : ''}
                 </div>
             </div>
-            <p class="project-description">${project.description}</p>
+            <p class="project-description">${escapeHtml(project.description)}</p>
             <div class="project-tech">
-                ${project.technologies.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
+                ${project.technologies.map(tech => `<span class="tech-tag">${escapeHtml(tech)}</span>`).join('')}
             </div>
             <div class="project-meta">
-                ${project.language ? `<span class="project-language"><i class="fas fa-code"></i> ${project.language}</span>` : ''}
+                ${project.language ? `<span class="project-language"><i class="fas fa-code" aria-hidden="true"></i> ${escapeHtml(project.language)}</span>` : ''}
             </div>
-            <div class="project-category">${project.category}</div>
-            <div class="project-details-btn" onclick="showProjectModal(${project.id})">
-                <i class="fas fa-info-circle me-2"></i>View Details
-            </div>
+            <div class="project-category">${escapeHtml(project.category)}</div>
+            <button type="button" class="project-details-btn">
+                <i class="fas fa-info-circle me-2" aria-hidden="true"></i>View Details<span class="visually-hidden">: ${escapeHtml(project.title)}</span>
+            </button>
         </div>
     `;
-    
+    col.querySelector('.project-details-btn').addEventListener('click', () => showProjectModal(project.id));
+
     return col;
 }
 
@@ -291,8 +344,12 @@ function initProjectFilters() {
     filterBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             // Update active button
-            filterBtns.forEach(b => b.classList.remove('active'));
+            filterBtns.forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-pressed', 'false');
+            });
             this.classList.add('active');
+            this.setAttribute('aria-pressed', 'true');
             
             // Filter projects
             const filter = this.getAttribute('data-filter');
@@ -312,60 +369,55 @@ function initProjectFilters() {
 
 // Project Modal
 function showProjectModal(projectId) {
-    fetch('/api/projects')
-        .then(response => response.json())
-        .then(projects => {
-            const project = projects.find(p => p.id === projectId);
-            if (project) {
-                const modal = document.getElementById('projectModal');
-                const modalTitle = document.getElementById('projectModalTitle');
-                const modalBody = document.getElementById('projectModalBody');
-                
-                modalTitle.textContent = project.title;
-                modalBody.innerHTML = `
-                    <div class="project-modal-header mb-3">
-                        <div class="project-period">
-                            <span class="badge bg-primary">${project.period}</span>
-                        </div>
-                        <div class="project-modal-actions">
-                            ${project.github_url ? `
-                                <a href="${project.github_url}" target="_blank" class="btn btn-outline-dark btn-sm">
-                                    <i class="fab fa-github me-2"></i>View on GitHub
-                                </a>
-                            ` : ''}
-                            ${project.stars ? `
-                                <span class="project-stars ms-2">
-                                    <i class="fas fa-star text-warning"></i> ${project.stars}
-                                </span>
-                            ` : ''}
-                        </div>
-                    </div>
-                    <p class="project-description">${project.description}</p>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Technologies Used:</h6>
-                            <div class="project-tech mb-3">
-                                ${project.technologies.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Project Details:</h6>
-                            <div class="project-details mb-3">
-                                ${project.language ? `<span class="detail-item"><i class="fas fa-code"></i> ${project.language}</span>` : ''}
-                                <span class="detail-item"><i class="fas fa-tag"></i> ${project.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <h6>Key Highlights:</h6>
-                    <ul>
-                        ${project.highlights.map(highlight => `<li>${highlight}</li>`).join('')}
-                    </ul>
-                `;
-                
-                new bootstrap.Modal(modal).show();
-            }
-        })
-        .catch(error => console.error('Error loading project details:', error));
+    const project = projectsData.find(p => p.id === projectId);
+    if (!project) return;
+
+    const modal = document.getElementById('projectModal');
+    const modalTitle = document.getElementById('projectModalTitle');
+    const modalBody = document.getElementById('projectModalBody');
+
+    modalTitle.textContent = project.title;
+    modalBody.innerHTML = `
+        <div class="project-modal-header mb-3">
+            <div class="project-period">
+                <span class="badge bg-primary">${escapeHtml(project.period)}</span>
+            </div>
+            <div class="project-modal-actions">
+                ${project.github_url ? `
+                    <a href="${escapeHtml(project.github_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark btn-sm">
+                        <i class="fab fa-github me-2" aria-hidden="true"></i>View on GitHub
+                    </a>
+                ` : ''}
+                ${project.stars ? `
+                    <span class="project-stars ms-2">
+                        <i class="fas fa-star text-warning" aria-hidden="true"></i> ${escapeHtml(project.stars)}<span class="visually-hidden"> stars</span>
+                    </span>
+                ` : ''}
+            </div>
+        </div>
+        <p class="project-description">${escapeHtml(project.description)}</p>
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Technologies Used:</h6>
+                <div class="project-tech mb-3">
+                    ${project.technologies.map(tech => `<span class="tech-tag">${escapeHtml(tech)}</span>`).join('')}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Project Details:</h6>
+                <div class="project-details mb-3">
+                    ${project.language ? `<span class="detail-item"><i class="fas fa-code" aria-hidden="true"></i> ${escapeHtml(project.language)}</span>` : ''}
+                    <span class="detail-item"><i class="fas fa-tag" aria-hidden="true"></i> ${escapeHtml(project.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()))}</span>
+                </div>
+            </div>
+        </div>
+        <h6>Key Highlights:</h6>
+        <ul>
+            ${project.highlights.map(highlight => `<li>${escapeHtml(highlight)}</li>`).join('')}
+        </ul>
+    `;
+
+    bootstrap.Modal.getOrCreateInstance(modal).show();
 }
 
 // Particle Animation

@@ -23,17 +23,23 @@ class SkillsCharts {
     async loadSkillsData() {
         try {
             const response = await fetch('/api/skills');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             this.skillsData = await response.json();
         } catch (error) {
             console.error('Error loading skills data:', error);
-            // Fallback data
-            this.skillsData = {
-                programming: { Python: 95, JavaScript: 85, SQL: 90, Java: 80, 'C++': 75 },
-                ml_ai: { TensorFlow: 90, 'Scikit-learn': 95, PyTorch: 85, OpenCV: 90, NLP: 88 },
-                cloud_tools: { AWS: 85, Docker: 80, MLflow: 75, FastAPI: 88, Flask: 92 },
-                databases: { PostgreSQL: 85, MongoDB: 80, MySQL: 90, Redis: 75, Hadoop: 70 }
-            };
+            this.skillsData = null;
         }
+    }
+
+    // Replace a chart's canvas with a text message (error or empty state)
+    showStatus(canvasId, message) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const status = document.createElement('p');
+        status.className = 'chart-status';
+        status.setAttribute('role', 'status');
+        status.textContent = message;
+        canvas.replaceWith(status);
     }
 
     bindEvents() {
@@ -53,19 +59,25 @@ class SkillsCharts {
     }
 
     initCharts() {
-        if (!this.skillsData) return;
+        const charts = [
+            ['programmingChart', 'programming', this.createPolarChart],
+            ['mlChart', 'ml_ai', this.createBarChart],
+            ['cloudChart', 'cloud_tools', this.createDoughnutChart],
+            ['databaseChart', 'databases', this.createRadarChart]
+        ];
 
-        // Programming Languages Chart
-        this.createPolarChart('programmingChart', this.skillsData.programming);
-        
-        // ML & AI Chart
-        this.createBarChart('mlChart', this.skillsData.ml_ai);
-        
-        // Cloud & Tools Chart
-        this.createDoughnutChart('cloudChart', this.skillsData.cloud_tools);
-        
-        // Databases Chart
-        this.createRadarChart('databaseChart', this.skillsData.databases);
+        charts.forEach(([canvasId, key, create]) => {
+            if (!this.skillsData) {
+                this.showStatus(canvasId, 'Skills couldn\'t be loaded. Please refresh the page to try again.');
+                return;
+            }
+            const data = this.skillsData[key];
+            if (!data || Object.keys(data).length === 0) {
+                this.showStatus(canvasId, 'No skills listed in this category yet.');
+                return;
+            }
+            create.call(this, canvasId, data);
+        });
     }
 
     createPolarChart(canvasId, data) {
