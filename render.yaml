@@ -1,0 +1,25 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Deploy: Render Dashboard → New → Blueprint → select this repository.
+services:
+  - type: web
+    name: mayur-gadekar-portfolio
+    runtime: docker
+    plan: free # Spins down when idle; the first visit after that takes longer to load.
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PORT
+        value: "8000"
+      # Trust Render's proxy for the original scheme (https), so HSTS is sent.
+      - key: FORWARDED_ALLOW_IPS
+        value: "*"
+      # Render appends to X-Forwarded-For, so its first entry can be spoofed. Cloudflare sets
+      # CF-Connecting-IP itself, which keeps the contact-form rate limit keyed to the real visitor.
+      - key: CLIENT_IP_HEADER
+        value: cf-connecting-ip
+      - key: CONTACT_EMAIL
+        value: mayurgadekar2501@gmail.com
+      # SMTP is added later in the Render Dashboard (Environment tab), not here, so secrets never
+      # enter the repo: SMTP_USERNAME, SMTP_PASSWORD (Gmail App Password), optionally SMTP_SENDER.
